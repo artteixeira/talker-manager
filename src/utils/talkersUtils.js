@@ -31,8 +31,41 @@ const addNewTalker = async (name, age, talk) => {
   return newTalker;
 };
 
+const editTalkerById = async (id, name, age, talk) => {
+  const talkers = await readAllTalkers();
+
+  const index = talkers.findIndex((e) => e.id === Number(id));
+  talkers[index] = { id: Number(id), name, age, talk };
+
+  const updateTalkers = JSON.stringify(talkers);
+
+  await fs.writeFile(talkersPath, updateTalkers);
+
+  return talkers[index];
+};
+
+const deleteTalkerById = async (id) => {
+  const talkers = await readAllTalkers();
+
+  const index = talkers.findIndex((e) => e.id === Number(id));
+  talkers.splice(index, 1);
+
+  const updateTalkers = JSON.stringify(talkers);
+  await fs.writeFile(talkersPath, updateTalkers);
+};
+
+const filterTalkersByQuery = async (query) => {
+  const talkers = await readAllTalkers();
+
+  const filteredTalkers = talkers.filter((e) => e.name.includes(query));
+  return filteredTalkers;
+};
+
 module.exports = {
   readAllTalkers,
   getTalkerById,
   addNewTalker,
+  editTalkerById,
+  deleteTalkerById,
+  filterTalkersByQuery,
 };
