@@ -55,10 +55,35 @@ const deleteTalkerById = async (id) => {
 };
 
 const filterTalkersByQuery = async (query) => {
+  const { q, rate, date } = query;
+
   const talkers = await readAllTalkers();
 
-  const filteredTalkers = talkers.filter((e) => e.name.includes(query));
+  const filteredTalkers = talkers.filter((e) => {
+    if (q) return e.name.includes(q);
+    return true; 
+}).filter((e) => {
+  if (rate) return e.talk.rate === Number(rate);
+  
+  return true;
+}).filter((e) => {
+  if (date) return e.talk.watchedAt === date;
+  return true;
+});
+
   return filteredTalkers;
+};
+
+const updateTalkers = async (id, rate) => {
+  const allTalkers = await readAllTalkers();
+
+  const index = allTalkers.findIndex((e) => e.id === Number(id));
+
+  allTalkers[index].talk.rate = rate;
+
+  const updatedTalkers = JSON.stringify(allTalkers);
+
+  await fs.writeFile(talkersPath, updatedTalkers);
 };
 
 module.exports = {
@@ -68,4 +93,5 @@ module.exports = {
   editTalkerById,
   deleteTalkerById,
   filterTalkersByQuery,
+  updateTalkers,
 };

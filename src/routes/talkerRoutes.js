@@ -1,17 +1,29 @@
 const express = require('express');
+
 const { 
   readAllTalkers, 
   getTalkerById, 
   addNewTalker, 
   editTalkerById,
   deleteTalkerById,
-  filterTalkersByQuery, 
+  filterTalkersByQuery,
+  updateTalkers, 
 } = require('../utils/talkersUtils');
+
 const validateToken = require('../middlewares/validateToken');
 const validateName = require('../middlewares/validateName');
 const validateAge = require('../middlewares/validateAge');
 const validateAllTalk = require('../middlewares/validateTalk');
 const validateId = require('../middlewares/validateId');
+const findAll = require('../db/talkerDB');
+
+const { 
+  validateTalk, 
+  validateTalkRate, 
+  validateTalkWatchedAt, 
+  validateDate, 
+  validateRate, 
+} = validateAllTalk;
 
 const router = express.Router();
 
@@ -20,12 +32,11 @@ router.get('/', async (req, res) => {
   res.status(200).json(allTalkers);
 });
 
-router.get('/search', validateToken, async (req, res) => {
-  const { q } = req.query;
+router.get('/search', validateToken, validateTalkRate, validateDate, async (req, res) => {
   const allTalkers = await readAllTalkers();
-  const talkers = await filterTalkersByQuery(q);
+  const talkers = await filterTalkersByQuery(req.query);
 
-  if (!q) {
+  if (!req.query.q && !req.query.rate && !req.query.date) {
     return res.status(200).json(allTalkers);
   }
   
@@ -36,14 +47,18 @@ router.get('/search', validateToken, async (req, res) => {
   res.status(200).json(talkers);
 });
 
+router.get('/db', async (req, res) => {
+  const [result] = await findAll();
+  
+  res.status(200).json(result);
+});
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   const talker = await getTalkerById(id);
   if (!talker) res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   res.status(200).json(talker);
 });
-
-const { validateTalk, validateTalkRate, validateTalkWatchedAt } = validateAllTalk;
 
 router.post('/', 
   validateToken, 
@@ -75,7 +90,18 @@ router.put('/:id',
 
 router.delete('/:id', validateToken, async (req, res) => {
   const { id } = req.params;
+
   deleteTalkerById(id);
+
+  res.status(204).end();
+});
+
+router.patch('/rate/:id', validateToken, validateRate, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+
+  updateTalkers(id, Number(rate));
+
   res.status(204).end();
 });
 
