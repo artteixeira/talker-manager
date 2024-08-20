@@ -27,7 +27,7 @@ const {
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   const allTalkers = await readAllTalkers();
   res.status(200).json(allTalkers);
 });
@@ -47,7 +47,7 @@ router.get('/search', validateToken, validateTalkRate, validateDate, async (req,
   res.status(200).json(talkers);
 });
 
-router.get('/db', async (req, res) => {
+router.get('/db', async (_req, res) => {
   const [result] = await findAll();
   
   res.status(200).json(result);

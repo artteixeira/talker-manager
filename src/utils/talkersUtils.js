@@ -63,12 +63,11 @@ const filterTalkersByQuery = async (query) => {
     if (q) return e.name.includes(q);
     return true; 
 }).filter((e) => {
-  if (rate) return e.talk.rate === Number(rate);
-  
-  return true;
+    if (rate) return e.talk.rate === Number(rate);
+    return true;
 }).filter((e) => {
-  if (date) return e.talk.watchedAt === date;
-  return true;
+    if (date) return e.talk.watchedAt === date;
+    return true;
 });
 
   return filteredTalkers;
